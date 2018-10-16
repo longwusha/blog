@@ -3,12 +3,12 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
-subtitle:
+title: 不会醒的梦
+subtitle: 梦中的轻语
 description:
 keywords:
-author: John Doe
-language:
+author: lws <chenkun_lws@126.com>
+language: zh_CN
 timezone:
 
 # URL
@@ -40,6 +40,7 @@ relative_link: false
 future: true
 highlight:
   enable: true
+  hljs: true
   line_number: true
   auto_detect: false
   tab_replace:
@@ -73,9 +74,26 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: aria
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repository: git@github.com:longwusha/longwusha.github.io.git
+  branch: master
+
+# Hexo local search
+search:
+  path: search.xml
+  field: all
+
+# Hexo feed
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  hub:
+  content:
+  content_limit: 140
+  content_limit_delim: ' '
