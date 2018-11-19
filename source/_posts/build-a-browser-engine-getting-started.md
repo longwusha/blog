@@ -7,7 +7,7 @@ tags: [Rust, Browser Engine]
 **注：本文为译文，非常感谢[Let's build a browser engine](https://limpet.net/mbrubeck/2014/08/08/toy-layout-engine-1.html)系列博客**
 
 
-I'm building a toy HTML rendering engine, and I think you should too. This is the first in a series of articles:
+我正在构建一个玩具HTML渲染引擎，我认为你也应该这样做。 这是一系列文章中的第一篇：
 
 - Part 1: Getting started
 - Part 2: HTML
@@ -17,43 +17,43 @@ I'm building a toy HTML rendering engine, and I think you should too. This is th
 - Part 6: Block layout
 - Part 7: Painting 101
 
-The full series will describe the code I've written, and show how you can make your own. But first, let me explain why.
+完整系列将描述我编写的代码，并展示如何制作自己的代码。 但首先，让我解释一下原因。
 
-## You're building a what?
-Let's talk terminology. A browser engine is the portion of a web browser that works "under the hood" to fetch a web page from the internet, and translate its contents into forms you can read, watch, hear, etc. Blink, Gecko, WebKit, and Trident are browser engines. In contrast, the the browser's own UI—tabs, toolbar, menu and such—is called the chrome. Firefox and SeaMonkey are two browsers with different chrome but the same Gecko engine.
+## 你在建一个什么？
+我们来谈谈术语。 浏览器引擎是网络浏览器的一部分，它可以“在引擎盖下”从互联网上获取网页，并将其内容翻译成可以阅读，观看，收听等形式的表单.Blink，Gecko，WebKit和Trident 是浏览器引擎。 相比之下，浏览器自己的UI选项卡，工具栏，菜单等称为chrome。 Firefox和SeaMonkey是两个浏览器，具有不同的chrome但具有相同的Gecko引擎。
 
-A browser engine includes many sub-components: an HTTP client, an HTML parser, a CSS parser, a JavaScript engine (itself composed of parsers, interpreters, and compilers), and much more. Those components involved in parsing web formats like HTML and CSS and translating them into what you see on-screen are sometimes called the layout engine or rendering engine.
+浏览器引擎包括许多子组件：HTTP客户端，HTML解析器，CSS解析器，JavaScript引擎（本身由解析器，解释器和编译器组成）等等。 解析Web格式（如HTML和CSS）以及将它们转换为您在屏幕上看到的内容所涉及的组件有时称为布局引擎或渲染引擎。
 
-## Why a "toy" rendering engine?
-A full-featured browser engine is hugely complex. Blink, Gecko, WebKit—these are millions of lines of code each. Even younger, simpler rendering engines like Servo and WeasyPrint are each tens of thousands of lines. Not the easiest thing for a newcomer to comprehend!
+## 为什么一个“玩具”渲染引擎？
+功能齐全的浏览器引擎非常复杂。 Blink，Gecko，WebKit--每个都有数百万行代码。 即使是更年轻，更简单的渲染引擎，如Servo和WeasyPrint，也都是数万行。 对于新手来说，理解并不是最简单的事情！
 
-Speaking of hugely complex software: If you take a class on compilers or operating systems, at some point you will probably create or modify a "toy" compiler or kernel. This is a simple model designed for learning; it may never be run by anyone besides the person who wrote it. But making a toy system is a useful tool for learning how the real thing works. Even if you never build a real-world compiler or kernel, understanding how they work can help you make better use of them when writing your own programs.
+说到非常复杂的软件：如果你在编译器或操作系统上上课，在某些时候你可能会创建或修改“玩具”编译器或内核。 这是一个专为学习而设计的简单模型; 除了编写它的人之外，它可能永远不会被任何人操作。 但制作玩具系统是学习真实物品如何运作的有用工具。 即使您从未构建真实的编译器或内核，了解它们的工作方式也可以帮助您在编写自己的程序时更好地使用它们。
 
-So, if you want to become a browser developer, or just to understand what happens inside a browser engine, why not build a toy one? Like a toy compiler that implements a subset of a "real" programming language, a toy rendering engine could implement a small subset of HTML and CSS. It won't replace the engine in your everyday browser, but should nonetheless illustrate the basic steps needed for rendering a simple HTML document.
+那么，如果你想成为一名浏览器开发者，或者只是想了解浏览器引擎内部发生了什么，为什么不建立一个玩具呢？ 就像实现“真实”编程语言子集的玩具编译器一样，玩具渲染引擎可以实现HTML和CSS的一小部分。 它不会取代日常浏览器中的引擎，但应该说明渲染简单HTML文档所需的基本步骤。
 
-## Try this at home.
-I hope I've convinced you to give it a try. This series will be easiest to follow if you already have some solid programming experience and know some high-level HTML and CSS concepts. However, if you're just getting started with this stuff, or run into things you don't understand, feel free to ask questions and I'll try to make it clearer.
+## 在家尝试一下。
+我希望我说服你试一试。 如果您已经拥有一些可靠的编程经验并且了解一些高级HTML和CSS概念，那么本系列将是最容易理解的。 但是，如果你刚开始使用这些东西，或遇到你不理解的事情，请随意提问，我会尽量让它更清楚。
 
-Before you start, a few remarks on some choices you can make:
+在开始之前，您可以对一些选择做一些评论：
 
-## On Programming Languages
-You can build a toy layout engine in any programming language. Really! Go ahead and use a language you know and love. Or use this as an excuse to learn a new language if that sounds like fun.
+### 编程语言
+您可以使用任何编程语言构建玩具布局引擎。 真！ 来吧，使用你熟悉和喜爱的语言。 或者以此为借口学习一门新语言，如果这听起来很有趣。
 
-If you want to start contributing to major browser engines like Gecko or WebKit, you might want to work in C++ because it's the main language used in those engines, and using it will make it easier to compare your code to theirs.
+如果您想开始为Gecko或WebKit等主要浏览器引擎做贡献，您可能希望使用C ++，因为它是这些引擎中使用的主要语言，使用它可以更容易地将代码与他们的代码进行比较。
 
-My own toy project, robinson, is written in Rust. I'm part of the Servo team at Mozilla, so I've become very fond of Rust programming. Plus, one of my goals with this project is to understand more of Servo's implementation. Robinson sometimes uses simplified versions of Servo's data structures and code.
+我自己的玩具项目robinson是用Rust编写的。 我是Mozilla的Servo团队的一员，所以我非常喜欢Rust编程。 此外，我在这个项目中的目标之一是更多地了解Servo的实施。 Robinson有时会使用Servo数据结构和代码的简化版本。
 
-## On Libraries and Shortcuts
-In a learning exercise like this, you have to decide whether it's "cheating" to use someone else's code instead of writing your own from scratch. My advice is to write your own code for the parts that you really want to understand, but don't be shy about using libraries for everything else. Learning how to use a particular library can be a worthwhile exercise in itself.
+### 库与工具
+在这样的学习练习中，你必须决定是否“欺骗”使用别人的代码而不是从头开始编写自己的代码。 我的建议是为你真正想要理解的部分编写自己的代码，但不要害怕将库用于其他所有部分。 学习如何使用特定的库本身就是一项有价值的练习。
 
-I'm writing robinson not just for myself, but also to serve as example code for these articles and exercises. For this and other reasons, I want it to be as tiny and self-contained as possible. So far I've used no external code except for the Rust standard library. (This also side-steps the minor hassle of getting multiple dependencies to build with the same version of Rust while the language is still in development.) This rule isn't set in stone, though. For example, I may decide later to use a graphics library rather than write my own low-level drawing code.
+我正在写robinson，不仅仅是为了我自己，还要作为这些文章和练习的示例代码。 由于这个原因和其他原因，我希望它尽可能地小而且独立。 到目前为止，除了Rust标准库之外，我没有使用任何外部代码。 （这也解决了在使用相同版本的Rust时，使用相同版本的Rust构建多个依赖项的轻微麻烦，但语言仍在开发中。）但这条规则并非一成不变。 例如，我可能稍后决定使用图形库而不是编写我自己的低级绘图代码。
 
-Another way to avoid writing code is to just leave things out. For example, robinson has no networking code yet; it can only read local files. In a toy program, it's fine to just skip things if you feel like it. I'll point out potential shortcuts like this as I go along, so you can bypass steps that don't interest you and jump straight to the good stuff. You can always fill in the gaps later if you change your mind.
+避免编写代码的另一种方法是将事情遗漏。 例如，robinson还没有网络代码; 它只能读取本地文件。 在玩具程序中，如果您愿意，可以跳过一些东西。 我会指出这样的潜在快捷方式，所以你可以绕过不感兴趣的步骤，直接跳到好东西。 如果你改变主意，你可以随时填补空白。
 
-## First Step: The DOM
-Are you ready to write some code? We'll start with something small: data structures for the DOM. Let's look at robinson's dom module.
+## 第一步：DOM
+你准备好写一些代码吗？ 我们将从一些小事做起：DOM的数据结构。 让我们来看看罗宾逊的dom模块。
 
-The DOM is a tree of nodes. A node has zero or more children. (It also has various other attributes and methods, but we can ignore most of those for now.)
+DOM是节点树。 节点具有零个或多个子节点。 （它还有其他各种属性和方法，但我们暂时可以忽略其中的大部分属性和方法。）
 
 ``` rust
 struct Node {
@@ -65,7 +65,7 @@ struct Node {
 }
 ```
 
-There are several node types, but for now we will ignore most of them and say that a node is either an Element or a Text node. In a language with inheritance these would be subtypes of Node. In Rust they can be an enum (Rust's keyword for a "tagged union" or "sum type"):
+有几种节点类型，但是现在我们将忽略大多数节点类型，并说节点是Element或Text节点。 在具有继承的语言中，这些将是Node的子类型。 在Rust中，它们可以是枚举（Rust的关键字用于“标记联合”或“求和类型”）：
 
 ``` rust
 enum NodeType {
@@ -74,7 +74,7 @@ enum NodeType {
 }
 ```
 
-An element includes a tag name and any number of attributes, which can be stored as a map from names to values. Robinson doesn't support namespaces, so it just stores tag and attribute names as simple strings.
+元素包括标记名称和任意数量的属性，这些属性可以存储为从名称到值的映射。 Robinson不支持名称空间，因此它只将标记和属性名称存储为简单字符串。
 
 ``` rust
 struct ElementData {
@@ -85,7 +85,7 @@ struct ElementData {
 type AttrMap = HashMap<String, String>;
 ```
 
-Finally, some constructor functions to make it easy to create new nodes:
+最后，一些构造函数可以轻松创建新节点：
 
 ``` rust
 fn text(data: String) -> Node {
@@ -103,23 +103,23 @@ fn elem(name: String, attrs: AttrMap, children: Vec<Node>) -> Node {
 }
 ```
 
-And that's it! A full-blown DOM implementation would include a lot more data and dozens of methods, but this is all we need to get started.
+就是这样！ 一个完整的DOM实现将包括更多的数据和许多方法，但这是我们开始需要的全部内容。
 
-## Exercises
-These are just a few suggested ways to follow along at home. Do the exercises that interest you and skip any that don't.
+## 练习
+这些只是在家中遵循的一些建议方法。 做你感兴趣的练习，跳过任何没有的练习。
 
-1. Start a new program in the language of your choice, and write code to represent a tree of DOM text nodes and elements.
+1. 以您选择的语言启动一个新程序，并编写代码来表示DOM文本节点和元素的树。
 
-2. Install the latest version of Rust, then download and build robinson. Open up dom.rs and extend NodeType to include additional types like comment nodes.
+2. 安装最新版本的Rust，然后下载并构建robinson。 打开dom.rs并扩展NodeType以包含注释节点等其他类型。
 
-3. Write code to pretty-print a tree of DOM nodes.
+3. 编写代码以漂亮打印DOM节点树。
 
-In the next article, we'll add a parser that turns HTML source code into a tree of these DOM nodes.
+在下一篇文章中，我们将添加一个解析器，将HTML源代码转换为这些DOM节点的树。
 
-## References
-For much more detailed information about browser engine internals, see Tali Garsiel's wonderful How Browsers Work and its links to further resources.
+## 引用
+有关浏览器引擎内部的更多详细信息，请参阅Tali Garsiel的精彩浏览器工作方式及其与更多资源的链接。
 
-For example code, here's a short list of "small" open source web rendering engines. Most of them are many times bigger than robinson, but still way smaller than Gecko or WebKit. WebWhirr, at 2000 lines of code, is the only other one I would call a "toy" engine.
+例如代码，这里是“小”开源Web渲染引擎的简短列表。 他们中的大多数比鲁宾逊大很多倍，但仍然比Gecko或WebKit小。 WebWhir，2000行代码，是我称之为“玩具”引擎的唯一另一个。
 
 - CSSBox (Java)
 - Cocktail (Haxe)
@@ -132,5 +132,5 @@ For example code, here's a short list of "small" open source web rendering engin
 - WeasyPrint (Python)
 - WebWhirr (C++)
 
-You may find these useful for inspiration or reference. If you know of any other similar projects—or if you start your own—please let me know!
+您可能会发现这些对于灵感或参考有用。 如果你知道任何其他类似的项目 - 或者如果你自己开始 - 请告诉我！
 
